@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import CourseService from "../services/course.service";
 
 const PostCourseComponent = (props) => {
-  let { currentUser, setCurrentUser } = props;
+  let { currentUser } = props;
   let [title, setTitle] = useState("");
   let [description, setDescription] = useState("");
   let [price, setPrice] = useState(0);
@@ -51,7 +51,7 @@ const PostCourseComponent = (props) => {
           <p>只有講師可以發布新課程。</p>
         </div>
       )}
-      {currentUser && currentUser.user.role == "instructor" && (
+      {currentUser && currentUser.user.role === "instructor" && (
         <div className="form-group">
           <label for="exampleforTitle">課程標題：</label>
           <input

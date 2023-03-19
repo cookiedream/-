@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CourseService from "../services/course.service";
@@ -12,7 +13,7 @@ const CourseComponent = ({ currentUser, setCurrentUser }) => {
     let _id;
     if (currentUser) {
       _id = currentUser.user._id;
-      if (currentUser.user.role == "instructor") {
+      if (currentUser.user.role === "instructor") {
         CourseService.get(_id)
           .then((data) => {
             setCourseData(data.data);
@@ -20,7 +21,7 @@ const CourseComponent = ({ currentUser, setCurrentUser }) => {
           .catch((e) => {
             console.log(e);
           });
-      } else if (currentUser.user.role == "student") {
+      } else if (currentUser.user.role === "student") {
         CourseService.getEnrolledCourses(_id)
           .then((data) => {
             console.log(data);
@@ -46,17 +47,17 @@ const CourseComponent = ({ currentUser, setCurrentUser }) => {
           </button>
         </div>
       )}
-      {currentUser && currentUser.user.role == "instructor" && (
+      {currentUser && currentUser.user.role === "instructor" && (
         <div>
           <h1>歡迎來到講師的課程頁面。</h1>
         </div>
       )}
-      {currentUser && currentUser.user.role == "student" && (
+      {currentUser && currentUser.user.role === "student" && (
         <div>
           <h1>歡迎來到學生的課程頁面。</h1>
         </div>
       )}
-      {currentUser && courseData && courseData.length != 0 && (
+      {currentUser && courseData && courseData.length !== 0 && (
         <div style={{ display: "flex", flexWrap: "wrap" }}>
           {courseData.map((course) => {
             return (

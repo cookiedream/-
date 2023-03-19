@@ -1,6 +1,3 @@
-import { useState, useEffect } from "react";
-import AuthService from "../services/auth.service";
-
 const ProfileComponent = ({ currentUser, setCurrentUser }) => {
   return (
     <div style={{ padding: "3rem" }}>
