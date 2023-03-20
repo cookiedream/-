@@ -34,6 +34,12 @@ const CourseComponent = ({ currentUser, setCurrentUser }) => {
     }
   }, []);
 
+  const handleDelete = () => {
+    CourseService.delete().then(() => {
+      window.location.reload("重新整理頁面");
+    });
+  };
+
   return (
     <div style={{ padding: "3rem" }}>
       {!currentUser && (
@@ -49,20 +55,37 @@ const CourseComponent = ({ currentUser, setCurrentUser }) => {
       )}
       {currentUser && currentUser.user.role === "instructor" && (
         <div>
-          <h1>歡迎來到講師的課程頁面。</h1>
+          <h1 style={{ display: "flex", justifyContent: "center" }}>
+            歡迎來到講師的課程頁面
+          </h1>
         </div>
       )}
       {currentUser && currentUser.user.role === "student" && (
         <div>
-          <h1>歡迎來到學生的課程頁面。</h1>
+          <h1 style={{ display: "flex", justifyContent: "center" }}>
+            歡迎來到學生的課程頁面。
+          </h1>
         </div>
       )}
       {currentUser && courseData && courseData.length !== 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap" }}>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+          }}
+        >
           {courseData.map((course) => {
             return (
               <div className="card" style={{ width: "18rem", margin: "1rem" }}>
-                <div className="card-body">
+                <div
+                  className="card-body"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                  }}
+                >
                   <h5 className="card-title">課程名稱:{course.title}</h5>
                   <p style={{ margin: "0.5rem 0rem" }} className="card-text">
                     {course.description}
@@ -73,6 +96,25 @@ const CourseComponent = ({ currentUser, setCurrentUser }) => {
                   <p style={{ margin: "0.5rem 0rem" }}>
                     課程價格: {course.price}
                   </p>
+                  {currentUser && currentUser.user.role === "instructor" && (
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <button
+                        type="button"
+                        class="btn btn-danger"
+                        onClick={handleDelete}
+                      >
+                        Delete
+                      </button>
+                      <button type="button" class="btn btn-success">
+                        Edit
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             );
