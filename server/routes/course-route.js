@@ -15,7 +15,7 @@ router.get("/", async (req, res) => {
       .exec();
     return res.send(courseFound);
   } catch (e) {
-    return res.status(5000).send(e);
+    return res.status(500).send(e);
   }
 });
 
