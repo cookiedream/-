@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react"; // 引入 React 和 useState, useEffect 鉤子。
 import { useNavigate } from "react-router-dom"; // 引入 useNavigate 鉤子。
 import CourseService from "../services/course.service"; // 引入與課程相關的服務。
+import Button from "react-bootstrap/Button";
+import Modal from "react-bootstrap/Modal";
 
 const CourseComponent = ({ currentUser, setCurrentUser }) => {
   // 定義課程組件，接受兩個屬性 currentUser 和 setCurrentUser。
@@ -11,6 +13,16 @@ const CourseComponent = ({ currentUser, setCurrentUser }) => {
     navigate("/login"); // 跳轉到登錄頁面。
   };
   const [courseData, setCourseData] = useState(null); // 創建一個 state 變量 courseData，存儲課程數據。
+
+  const [showMap, setShowMap] = useState({});
+
+  const handleShow = (id) => {
+    setShowMap({ ...showMap, [id]: true });
+  };
+  const handleClose = (id) => {
+    setShowMap({ ...showMap, [id]: false });
+    window.location.reload();
+  };
 
   useEffect(() => {
     // 副作用鉤子，每當 currentUser 發生變化時，獲取課程數據。
@@ -51,8 +63,10 @@ const CourseComponent = ({ currentUser, setCurrentUser }) => {
       if (result) {
         // 呼叫 CourseService 的 delete 函式，傳入 _id 參數
         CourseService.delete(_id);
-        // 重新載入頁面
-        window.location.reload("重新整理頁面");
+        //以使用 setCourseData 更新 courseData 狀態，然後 useEffect 會重新渲染組件。
+        setCourseData((prevCourses) =>
+          prevCourses.filter((course) => course._id !== _id)
+        );
       } else {
         // 如果使用者取消刪除，不做任何事情
       }
@@ -62,25 +76,36 @@ const CourseComponent = ({ currentUser, setCurrentUser }) => {
     }
   };
 
-  const handlePatch = (_id) => {
-    if (currentUser && currentUser.user.role === "instructor") {
-      CourseService.patch(_id)
-        .then(() => {
-          // 重新載入頁面
-          window.location.reload("重新整理頁面");
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    } else {
-      console.log("只有講師可以編輯課程。");
-    }
+  let [title, setTitle] = useState("");
+  let [description, setDescription] = useState("");
+  let [price, setPrice] = useState(0);
+  let [message, setMessage] = useState("");
+
+  const handleChangeTitle = (e) => {
+    setTitle(e.target.value);
+  };
+  const handleChangeDesciption = (e) => {
+    setDescription(e.target.value);
+  };
+  const handleChangePrice = (e) => {
+    setPrice(e.target.value);
+  };
+  const handleUpdate = () => {
+    CourseService.patch(title, description, price)
+      .then(() => {
+        window.alert("課程已修改");
+      })
+      .catch((error) => {
+        console.log(error.response);
+        setMessage(error.response.data);
+      });
   };
 
   return (
     <div style={{ padding: "3rem" }}>
       {!currentUser && (
         <div>
+          <br />
           <p>您必須先登入才能看到課程。</p>
           <button
             className="btn btn-primary btn-lg"
@@ -92,6 +117,7 @@ const CourseComponent = ({ currentUser, setCurrentUser }) => {
       )}
       {currentUser && currentUser.user.role === "instructor" && (
         <div>
+          <br />
           <h1 style={{ display: "flex", justifyContent: "center" }}>
             歡迎來到講師的課程頁面
           </h1>
@@ -99,6 +125,7 @@ const CourseComponent = ({ currentUser, setCurrentUser }) => {
       )}
       {currentUser && currentUser.user.role === "student" && (
         <div>
+          <br />
           <h1 style={{ display: "flex", justifyContent: "center" }}>
             歡迎來到學生的課程頁面。
           </h1>
@@ -140,20 +167,85 @@ const CourseComponent = ({ currentUser, setCurrentUser }) => {
                         justifyContent: "space-between",
                       }}
                     >
-                      <button
-                        type="button"
+                      <Button
+                        variant="danger"
                         class="btn btn-danger"
                         onClick={() => handleDelete(course._id)}
                       >
                         Delete
-                      </button>
-                      <button
-                        type="button"
-                        class="btn btn-success"
-                        onClick={() => handlePatch(course._id)}
+                      </Button>
+                      <Button
+                        variant="primary"
+                        onClick={() => handleShow(course._id)}
+                        data-target={course._id}
                       >
-                        Edit
-                      </button>
+                        編輯
+                      </Button>
+
+                      <Modal
+                        show={showMap[course._id]}
+                        onHide={() => handleClose(course._id)}
+                      >
+                        <Modal.Header closeButton>
+                          {/* <Modal.Title>{course.title}</Modal.Title> */}
+                        </Modal.Header>
+                        <Modal.Body>
+                          <div className="form-group">
+                            <label for="exampleforTitle">
+                              課程標題：{course.title}
+                            </label>
+                            <input
+                              name="title"
+                              type="text"
+                              className="form-control"
+                              id="exampleforTitle"
+                              onChange={handleChangeTitle}
+                            />
+                            <br />
+                            <label for="exampleforContent">
+                              內容：{course.description}
+                            </label>
+                            <textarea
+                              className="form-control"
+                              id="exampleforContent"
+                              aria-describedby="emailHelp"
+                              name="content"
+                              onChange={handleChangeDesciption}
+                            />
+                            <br />
+                            <label for="exampleforPrice">
+                              價格：{course.price}
+                            </label>
+                            <input
+                              name="price"
+                              type="number"
+                              className="form-control"
+                              id="exampleforPrice"
+                              onChange={handleChangePrice}
+                            />
+                            <br />
+                            {message && (
+                              <div className="alert alert-warning" role="alert">
+                                {message}
+                              </div>
+                            )}
+                          </div>
+                        </Modal.Body>
+                        <Modal.Footer>
+                          <Button
+                            variant="secondary"
+                            onClick={() => handleClose(course._id)}
+                          >
+                            Close
+                          </Button>
+                          <Button
+                            variant="primary"
+                            onClick={() => handleUpdate(course._id)}
+                          >
+                            Save Changes
+                          </Button>
+                        </Modal.Footer>
+                      </Modal>
                     </div>
                   )}
                 </div>
